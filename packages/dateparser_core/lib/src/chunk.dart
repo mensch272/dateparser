@@ -1,6 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:dateparser/src/value.dart';
+import 'package:dateparser_core/src/value.dart';
 
 enum OpCode {
   PUSH_DATETIME_NOW,

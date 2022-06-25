@@ -1,13 +1,14 @@
 library dateparser;
 
-import 'package:dateparser/src/chunk.dart';
-import 'package:dateparser/src/compiler.dart';
-import 'package:dateparser/src/value.dart';
-import 'package:dateparser/src/vm.dart';
+import 'package:dateparser/src/generated_data.dart';
+import 'package:dateparser_core/dateparser_core.dart';
 
-DateTime parse(String source) {
+DateTime parse(String source, {LocaleData? locale}) {
+  final data = locale ?? GeneratedData('en');
+  source = data.preprocess(source);
+
   final chunk = Chunk();
-  final parser = Parser(source, chunk);
+  final parser = Parser(source, chunk, data: data);
   if (!parser.compile()) {
     throw Exception(); // FIXME: custom exception class
   }

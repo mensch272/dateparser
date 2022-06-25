@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:dateparser/src/debug.dart';
+import 'package:dateparser_core/src/debug.dart';
 
 import 'chunk.dart';
 import 'value.dart';
@@ -22,12 +22,12 @@ class VM {
   InterpretResult run() {
     while (true) {
       // DEBUG: Comment out when testing is done
-      stdout.write('     ');
-      for (final value in stack.reversed) {
-        stdout.write('[$value]');
-      }
-      stdout.write('\n');
-      disassembleIntruction(chunk, ip);
+      // stdout.write('     ');
+      // for (final value in stack.reversed) {
+      //   stdout.write('[$value]');
+      // }
+      // stdout.write('\n');
+      // disassembleIntruction(chunk, ip);
       // End DEBUG
 
       final instruction = read().toCode();

@@ -1,13 +1,14 @@
-import 'package:dateparser/src/scanner.dart';
-import 'package:dateparser/src/token.dart';
+import 'package:dateparser/src/generated_data.dart';
+import 'package:dateparser_core/dateparser_core.dart';
 
 void main(List<String> args) {
-  final content = args.first;
+  final data = GeneratedData('en');
+  final content = data.preprocess(args.first);
 
-  final scanner = Scanner(content);
+  final scanner = Scanner(content, data: data);
   while (true) {
     final token = scanner.scanToken();
-    if (token.type == TokenType.EOF) {
+    if (token.type == TokenType.CT_EOF) {
       break;
     }
 

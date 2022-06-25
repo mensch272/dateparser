@@ -1,19 +1,24 @@
 import 'dart:io';
 
-import 'package:dateparser/src/debug.dart';
-import 'package:dateparser/src/token.dart';
-import 'package:dateparser/src/utils.dart';
-import 'package:dateparser/src/value.dart';
+import 'package:dateparser_core/dateparser_core.dart';
+import 'package:dateparser_core/src/lang_data.dart';
+import 'package:dateparser_core/src/value.dart';
 
 import 'chunk.dart';
 import 'scanner.dart';
 
 class Parser {
-  Parser(this.source, this.chunk) : scanner = Scanner(source);
+  Parser(
+    this.source,
+    this.chunk, {
+    required this.data,
+  }) : scanner = Scanner(source, data: data);
 
   final String source;
   final Chunk chunk;
   final Scanner scanner;
+
+  final LocaleData data;
 
   Token previous = Token.empty();
   Token current = Token.empty();
@@ -24,7 +29,7 @@ class Parser {
   bool compile() {
     advance();
     expression();
-    consume(TokenType.EOF, "Expect end of expression.");
+    consume(TokenType.CT_EOF, "Expect end of expression.");
     endCompiler();
     return !hadError;
   }
@@ -34,9 +39,13 @@ class Parser {
 
     while (true) {
       current = scanner.scanToken();
-      if (current.type != TokenType.ERROR) break;
-
-      errorAtCurrent(current.value);
+      if (current.type == TokenType.CT_SKIP) {
+        continue;
+      } else if (current.type == TokenType.CT_ERROR) {
+        errorAtCurrent(current.value);
+      } else {
+        break;
+      }
     }
   }
 
@@ -63,9 +72,9 @@ class Parser {
     emitReturn();
 
     // DEBUG: Comment out when testing is done
-    if (!hadError) {
-      disassembleChunk(chunk, 'code');
-    }
+    // if (!hadError) {
+    //   disassembleChunk(chunk, 'code');
+    // }
     // DEBUG
   }
 
@@ -76,22 +85,7 @@ class Parser {
   }
 
   void relative() {
-    if (match(TokenType.YESTERDAY)) {
-      emitConstant(Value.number(1));
-      emitByte(OpCode.DURATION_DAYS.index);
-      emitByte(OpCode.DIRECTION_AGO.index);
-      emitByte(OpCode.INTO_DATE.index);
-    } else if (match(TokenType.TODAY)) {
-      emitConstant(Value.number(0));
-      emitByte(OpCode.DURATION_DAYS.index);
-      emitByte(OpCode.DIRECTION_AGO.index);
-      emitByte(OpCode.INTO_DATE.index);
-    } else if (match(TokenType.TOMORROW)) {
-      emitConstant(Value.number(1));
-      emitByte(OpCode.DURATION_DAYS.index);
-      emitByte(OpCode.DIRECTION_REMAINING.index);
-      emitByte(OpCode.INTO_DATE.index);
-    } else if (match(TokenType.IN)) {
+    if (match(TokenType.IN)) {
       inExact();
     } else {
       exact();
@@ -172,8 +166,6 @@ class Parser {
     } else {
       errorAtCurrent("Expect a timeframe indicator.");
     }
-
-    // TODO: add year and decade support
   }
 
   void direction() {
@@ -233,9 +225,9 @@ class Parser {
 
     stdout.write('Error');
 
-    if (token.type == TokenType.EOF) {
+    if (token.type == TokenType.CT_EOF) {
       stdout.write(' at end');
-    } else if (token.type == TokenType.ERROR) {
+    } else if (token.type == TokenType.CT_ERROR) {
       // Nothing.
     } else {
       stdout.write(" at '${token.value}'");

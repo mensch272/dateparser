@@ -1,10 +1,8 @@
 import 'package:dateparser/dateparser.dart';
-import 'package:dateparser/src/chunk.dart';
-import 'package:dateparser/src/debug.dart';
-import 'package:dateparser/src/vm.dart';
 
 void main(List<String> args) {
-  final dateTime = parse(args.first);
+  final source = args.isNotEmpty ? args.first : 'day before yesterday';
+  final dateTime = parse(source);
 
   print('');
   print('result: $dateTime');

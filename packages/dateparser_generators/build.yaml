@@ -1,0 +1,14 @@
+targets:
+  $default:
+    builders:
+      generators|annotations:
+        enabled: true
+
+builders:
+  generators:
+    target: ":dateparser_generators"
+    import: "package:dateparser_generators/builder.dart"
+    builder_factories: ["dataBuilder"]
+    build_extensions: { "$lib$": [".g.dart"] }
+    auto_apply: dependents
+    build_to: source

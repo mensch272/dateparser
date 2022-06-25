@@ -1,11 +1,13 @@
 import 'package:characters/characters.dart';
-
-import 'token.dart';
+import 'package:dateparser_core/dateparser_core.dart';
+import 'package:dateparser_core/src/lang_data.dart';
 
 class Scanner {
-  Scanner(String content) : characters = content.characters.toList();
+  Scanner(String content, {required this.data})
+      : characters = content.characters.toList();
 
   final List<String> characters;
+  final LocaleData data;
 
   int start = 0;
   int current = 0;
@@ -16,7 +18,7 @@ class Scanner {
     skipWhitespace();
     start = current;
 
-    if (isAtEnd) return makeToken(TokenType.EOF);
+    if (isAtEnd) return makeToken(TokenType.CT_EOF);
 
     final c = advance();
 
@@ -52,7 +54,7 @@ class Scanner {
   }
 
   Token errorToken(String value) {
-    return Token(TokenType.ERROR, value, line);
+    return Token(TokenType.CT_ERROR, value, line);
   }
 
   void skipWhitespace() {
@@ -116,7 +118,11 @@ class Scanner {
     }
 
     final value = characters.sublist(start, current).join();
-    final keyword = keywords[value];
+    if (data.skip.contains(value)) {
+      return makeToken(TokenType.CT_SKIP);
+    }
+
+    final keyword = keywords[value] ?? data.tokenMap[value];
     if (keyword != null) {
       return makeToken(keyword);
     }
